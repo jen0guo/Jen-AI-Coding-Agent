@@ -2,16 +2,16 @@
 
 I'm building a collection of AI agent projects, starting with a small chatbot and working toward a production-grade coding agent. This repository documents my hands-on experience with language models, tool calling, and the engineering decisions behind useful AI applications.
 
-Each project builds on the previous one as I learn new concepts and put them into practice. The portfolio is a work in progress: the first chatbot is implemented, with retrieval-augmented generation (RAG) and coding agents on the roadmap.
+Each project builds on the previous one as I learn new concepts and put them into practice. The chatbot and retrieval-augmented generation (RAG) chatbot are implemented, with coding agents next on the roadmap.
 
 ## Project guide
 
-For a quick overview, scan the table below. To review the current implementation, start with [the chatbot with tool calling](chatbot/chatbot_v2.py).
+For a quick overview, scan the table below. Start with the [RAG chatbot](rag-qa-bot/rag_chatbot.py) to see document retrieval and answer generation working together, or the [chatbot with tool calling](chatbot/chatbot_v2.py) for the foundations.
 
 | Project | Status | Focus | Explore |
 | --- | --- | --- | --- |
 | Chatbot | Implemented | Conversation history, model API integration, and tool calling | [Overview](#1-chatbot) · [Code](chatbot/) |
-| RAG Chatbot | Planned | Retrieving relevant documents to answer questions with supporting sources | [Roadmap](#2-rag-chatbot) |
+| RAG Chatbot | Implemented | Document Q&A using Qwen embeddings, Chroma vector search, and DeepSeek | [Overview](#2-rag-chatbot) · [Code](rag-qa-bot/) |
 | Simple Coding Agent | Planned | Connecting a model to development tools through an iterative task loop | [Roadmap](#3-simple-coding-agent) |
 | Production-Grade Coding Agent | Planned | Building toward reliable, observable, and testable agent workflows | [Roadmap](#4-production-grade-coding-agent) |
 
@@ -30,9 +30,28 @@ The weather tool uses hardcoded sample data. The webpage tool reads server-retur
 
 ## 2. RAG Chatbot
 
-**Status: Planned.** Extend the chatbot to answer questions using a collection of documents.
+**Status: Implemented.** A command-line customer support chatbot that answers product questions using eight sample documentation excerpts. It retrieves the three closest matches by meaning, then asks DeepSeek to answer from those excerpts, link to the sources, and acknowledge when the documentation lacks an answer.
 
-Planned learning areas include document ingestion, text chunking, embeddings, retrieval, source citations, and evaluating whether answers are supported by the retrieved content.
+**Workflow:** Question → embedding → Chroma retrieval → excerpts added to the prompt → DeepSeek response.
+
+| Component | Technology |
+| --- | --- |
+| Application | Python |
+| Text embeddings | Qwen3-Embedding-0.6B via Sentence Transformers; model weights downloaded through ModelScope |
+| Vector storage and retrieval | Persistent Chroma database with cosine distance |
+| Answer generation | DeepSeek (`deepseek-v4-flash`) through the OpenAI Python SDK |
+| Initial search implementation | NumPy embedding storage and similarity ranking |
+| Configuration | Environment variables loaded with python-dotenv |
+
+**Explore the implementation:**
+
+- [RAG chatbot](rag-qa-bot/rag_chatbot.py): Retrieves context, builds the prompt, and generates answers.
+- [Chroma index builder](rag-qa-bot/build_index_chroma.py) and [search](rag-qa-bot/search_chroma.py): Store document vectors and metadata, then retrieve the top three matches.
+- [NumPy index builder](rag-qa-bot/build_index.py) and [search](rag-qa-bot/search.py): Show the initial embedding and ranking workflow before adding a vector database.
+
+**Skills demonstrated:** RAG pipeline integration, semantic search, vector databases, metadata handling, and prompting for answers with source links.
+
+The demo uses [sample documents](rag-qa-bot/documents.py) with placeholder source URLs and handles each question independently.
 
 ## 3. Simple Coding Agent
 
