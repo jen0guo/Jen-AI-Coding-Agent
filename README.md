@@ -2,17 +2,17 @@
 
 I'm building a collection of AI agent projects, starting with a small chatbot and working toward a production-grade coding agent. This repository documents my hands-on experience with language models, tool calling, and the engineering decisions behind useful AI applications.
 
-Each project builds on the previous one as I learn new concepts and put them into practice. The chatbot and retrieval-augmented generation (RAG) chatbot are implemented, with coding agents next on the roadmap.
+Each project builds on the previous one as I learn new concepts and put them into practice. The chatbot, retrieval-augmented generation (RAG) chatbot, and simple coding agent are implemented, with a production-grade coding agent next on the roadmap.
 
 ## Project guide
 
-For a quick overview, scan the table below. Start with the [RAG chatbot](rag-qa-bot/rag_chatbot.py) to see document retrieval and answer generation working together, or the [chatbot with tool calling](chatbot/chatbot_v2.py) for the foundations.
+For a quick overview, scan the table below. Start with the [simple coding agent](coding-agent/agent.py) to see an iterative tool-calling loop, the [RAG chatbot](rag-qa-bot/rag_chatbot.py) for document retrieval and answer generation, or the [chatbot with tool calling](chatbot/chatbot_v2.py) for the foundations.
 
 | Project | Status | Focus | Explore |
 | --- | --- | --- | --- |
 | Chatbot | Implemented | Conversation history, model API integration, and tool calling | [Overview](#1-chatbot) · [Code](chatbot/) |
 | RAG Chatbot | Implemented | Document Q&A using Qwen embeddings, Chroma vector search, and DeepSeek | [Overview](#2-rag-chatbot) · [Code](rag-qa-bot/) |
-| Simple Coding Agent | Planned | Connecting a model to development tools through an iterative task loop | [Roadmap](#3-simple-coding-agent) |
+| Simple Coding Agent | Implemented | File editing and command execution through an iterative DeepSeek tool-calling loop | [Overview](#3-simple-coding-agent) · [Code](coding-agent/) |
 | Production-Grade Coding Agent | Planned | Building toward reliable, observable, and testable agent workflows | [Roadmap](#4-production-grade-coding-agent) |
 
 ## 1. Chatbot
@@ -55,9 +55,28 @@ The demo uses [sample documents](rag-qa-bot/documents.py) with placeholder sourc
 
 ## 3. Simple Coding Agent
 
-**Status: Planned.** Build an agent that can inspect code, propose edits, and run checks on small programming tasks.
+**Status: Implemented.** A command-line programming assistant that uses DeepSeek to read and write local files and run shell commands. It returns tool output to the model so it can inspect results, revise code, and continue working on a task. Conversation history is retained during the session.
 
-Planned learning areas include agent control loops, file and command tools, tool feedback, and clear stopping conditions.
+**Workflow:** Programming task → model selects tools → Python executes tools → results returned to the model → repeat until the model responds without tool calls.
+
+| Component | Technology |
+| --- | --- |
+| Application and agent loop | Python with conversation history and sequential tool execution |
+| Language model | DeepSeek (`deepseek-v4-flash`) through the OpenAI Python SDK |
+| Tool interface | JSON function schemas and a Python function registry |
+| File access and command execution | Python file I/O and `subprocess.run` with a 10-second command timeout |
+| Webpage text extraction | `urllib.request` and Beautiful Soup |
+| Configuration | Environment variables loaded with python-dotenv |
+
+**Explore the implementation:**
+
+- [Agent loop](coding-agent/agent.py): Sends conversation history to the model, dispatches tool calls, and returns results for the next iteration.
+- [Tool implementations](coding-agent/tools/tools.py): Read and write files, execute shell commands, extract webpage text, and look up sample weather data.
+- [Tool definitions](coding-agent/tools/tools_config.py) and [function registry](coding-agent/tools/tools_mapping.py): Describe available tools and map model requests to Python functions.
+
+**Skills demonstrated:** Agent control loops, function calling, tool dispatch, conversation state, and using execution feedback to guide code changes.
+
+Commands run directly on the local machine. The agent prints tool activity and output previews; its loop has no fixed iteration limit.
 
 ## 4. Production-Grade Coding Agent
 
