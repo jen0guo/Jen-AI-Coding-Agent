@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from pydantic_ai import Agent
 from pydantic_ai.models.openai import OpenAIChatModel
 from pydantic_ai.providers.deepseek import DeepSeekProvider
+from pydantic_ai.capabilities import Hooks
 
 # Read the API key from an environment variable to avoid hard-coding
 # sensitive credentials in the source code.
@@ -23,6 +24,27 @@ model = OpenAIChatModel(
     "deepseek-v4-flash",
     provider=DeepSeekProvider(api_key=api_key),
 )
+
+hooks = Hooks()
+
+# Triggered before tool execution:
+# tool_def.name is the tool name,
+# args are the parameters decided by the model
+@hooks.on.before_tool_execute
+async def log_tool_call(ctx, *, call, tool_def, args):
+    print(f"[tool] calling {tool_def.name}, args {args}")
+    # If needed, modify args here
+    # The return value will be used as the actual arguments passed to the tool; 
+    # return them unchanged here
+    return args
+
+# Triggered after each model request returns
+@hooks.on.after_model_request
+async def log_usage(ctx, *, request_context, response):
+    # Get the token usage of this call from response.usage
+    usage = response.usage
+    print(f"[usage] input {usage.input_tokens} tokens, output {usage.output_tokens} tokens")
+    return response
 
 # OpenAI Model:
 # from pydantic_ai.providers.openai import OpenAIProvider
@@ -48,7 +70,8 @@ agent = Agent(
         "and run it to verify the result. If you find an error, fix it and "
         "run the code again. Continue until you have confirmed that the "
         "solution works correctly."
-    )
+    ),
+    capabilities=[hooks]
 )
 
 
