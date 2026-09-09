@@ -219,3 +219,4 @@ __marimo__/
 
 # Generated local Chroma vector databases
 chroma_db/
+coding-agent-pro/fib.py
