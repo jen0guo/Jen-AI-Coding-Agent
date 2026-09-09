@@ -2,7 +2,7 @@
 
 I'm building a collection of AI agent projects, starting with a small chatbot and working toward a production-grade coding agent. This repository documents my hands-on experience with language models, tool calling, and the engineering decisions behind useful AI applications.
 
-Each project builds on the previous one as I learn new concepts and put them into practice. The chatbot, retrieval-augmented generation (RAG) chatbot, and simple coding agent are implemented. The production-grade coding agent is in progress; work so far includes a PydanticAI prototype and four SDK examples.
+Each project builds on the previous one as I learn new concepts and put them into practice. The chatbot, retrieval-augmented generation (RAG) chatbot, and simple coding agent are implemented. The production-grade coding agent is in progress; work so far includes a PydanticAI prototype and companion examples exploring several agent SDKs.
 
 ## Project guide
 
@@ -13,7 +13,7 @@ For a quick overview, scan the table below. Compare the [simple coding agent](co
 | Chatbot | Implemented | Conversation history, model API integration, and tool calling | [Overview](#1-chatbot) · [Code](chatbot/) |
 | RAG Chatbot | Implemented | Document Q&A using Qwen embeddings, Chroma vector search, and DeepSeek | [Overview](#2-rag-chatbot) · [Code](rag-qa-bot/) |
 | Simple Coding Agent | Implemented | File editing and command execution through an iterative DeepSeek tool-calling loop | [Overview](#3-simple-coding-agent) · [Code](coding-agent/) |
-| Production-Grade Coding Agent | In progress | PydanticAI orchestration, typed tools, and examples of structured output, retries, dependencies, and hooks | [Overview](#4-production-grade-coding-agent) · [Code](coding-agent-pro/) |
+| Production-Grade Coding Agent | In progress | PydanticAI coding agent; OpenAI Agents SDK handoffs, LangGraph review loops, and CrewAI collaboration | [Overview](#4-production-grade-coding-agent) · [Code](coding-agent-pro/) |
 
 ## 1. Chatbot
 
@@ -82,6 +82,8 @@ Commands run directly on the local machine. The agent prints tool activity and o
 
 **Status: In progress.** Building a coding assistant toward production requirements using PydanticAI and DeepSeek. The current command-line prototype reads and writes local files, runs commands, and retains conversation history. PydanticAI manages the model/tool loop, while four standalone examples explore SDK features useful for building more reliable applications.
 
+As a companion learning feature, [SDK exploration examples](sdk-usage/) demonstrate specialist handoffs with the OpenAI Agents SDK, review and revision loops with LangGraph, and sequential agent collaboration with CrewAI. These standalone demos use DeepSeek and explore patterns that could inform future coding-agent development.
+
 **Workflow:** Programming task → PydanticAI agent → typed Python tools → results returned to the model → final response and updated conversation history.
 
 | Component | Technology |
@@ -91,6 +93,7 @@ Commands run directly on the local machine. The agent prints tool activity and o
 | Tool registration | `@agent.tool_plain`, Python type annotations, and docstrings |
 | File access and command execution | Python file I/O and `subprocess.run` with a 10-second command timeout |
 | SDK examples | Pydantic `BaseModel`, `ModelRetry`, `RunContext`, dataclasses, and `Hooks` |
+| Companion SDK exploration | OpenAI Agents SDK with LiteLLM, LangGraph with LangChain's `ChatOpenAI`, and CrewAI |
 | Configuration | API key loaded from environment variables with python-dotenv |
 
 **Explore the implementation:**
@@ -100,6 +103,12 @@ Commands run directly on the local machine. The agent prints tool activity and o
 - [Retry feedback](coding-agent-pro/sdk_usage_cases/alarm-assistant.py): Checks a reminder's date/time format and uses `ModelRetry` to request corrected tool arguments, with up to two retries.
 - [Dependency injection](coding-agent-pro/sdk_usage_cases/note-assistant.py): Passes a user ID and an in-memory notes store through `RunContext` so the tool searches that user's notes.
 - [Request hooks](coding-agent-pro/sdk_usage_cases/useHooks.py): Logs context message counts before model calls and input/output token usage afterward.
+
+**Companion SDK examples:**
+
+- [Customer service — OpenAI Agents SDK](sdk-usage/customer_service.py): A triage agent hands requests to billing or technical-support specialists, using DeepSeek through LiteLLM.
+- [Email review — LangGraph](sdk-usage/email_review.py): A state graph drafts an email, pauses for review, and resumes for revision or approval. In-memory checkpoints preserve progress; the demo supplies simulated reviewer feedback.
+- [Content writing — CrewAI](sdk-usage/content_writer.py): A researcher agent produces technical bullet points, then a writer agent uses that output to draft a short article through sequential tasks.
 
 **Skills demonstrated:** SDK-based agent orchestration, typed tool interfaces, structured model output, tool validation and retries, dependency injection, and request instrumentation.
 
