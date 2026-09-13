@@ -1,5 +1,6 @@
 import os
 import subprocess
+import logfire
 from dotenv import load_dotenv
 
 from pydantic_ai import Agent
@@ -46,6 +47,15 @@ async def log_usage(ctx, *, request_context, response):
     print(f"[usage] input {usage.input_tokens} tokens, output {usage.output_tokens} tokens")
     return response
 
+
+# send_to_logfire=False：output locally, not uploading to cloud platform
+# logfire.configure(send_to_logfire=False)
+
+# connect to Logfire cloud observability platform
+logfire.configure(service_name="coding-agent-pro")
+# Add checkpoints to Agent，generate span in every runtime
+logfire.instrument_pydantic_ai()
+
 # OpenAI Model:
 # from pydantic_ai.providers.openai import OpenAIProvider
 # model = OpenAIChatModel('gpt-5.5',
@@ -71,7 +81,7 @@ agent = Agent(
         "run the code again. Continue until you have confirmed that the "
         "solution works correctly."
     ),
-    capabilities=[hooks]
+    # capabilities=[hooks]
 )
 
 
